@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using Unity.VisualScripting;
+using UnityEditor.Experimental.GraphView;
 using UnityEditor.MemoryProfiler;
 using UnityEngine;
 
@@ -83,7 +84,31 @@ public class PathManager : MonoBehaviour
         openList.Add(new NodeRecord(start));
         while(openList.Count >0)
         {
-            
+            currentRecord = GetSmallestNode();
+            if(currentRecord.node == goal)
+            {
+                openList.Remove(currentRecord);
+                closeList.Add(currentRecord);
+                currentRecord.node.tile.GetComponent<TileScript>().SetStatus(TileStatus.CLOSED);
+                break;
+            }
+            List<PathConnection> connections = currentRecord.node.connections;
         }
+    }
+    public NodeRecord GetSmallestNode()
+    {
+        NodeRecord smallestNode = openList[0];
+        for(int i = 1; i <openList.Count; i++)
+        {
+            if(openList[i].costSoFar < smallestNode.costSoFar)
+            {
+                smallestNode = openList[i];
+            }
+            else if(openList[i].costSoFar == smallestNode.costSoFar)
+            {
+                smallestNode = (Random.value< 0.5f ? openList[i] : smallestNode);
+            }
+        }
+        return smallestNode;
     }
 }
