@@ -84,6 +84,16 @@ public class GridManager : MonoBehaviour
             }
             mines.Clear();
         }
+        if (Input.GetKeyDown(KeyCode.F))
+        {
+            GameObject ship = GameObject.FindGameObjectWithTag("Ship");
+            Vector2 shipIndices = ship.GetComponent<NavigationObject>().GetGridIndex();
+            PathNode start = grid[(int)shipIndices.y,(int)shipIndices.x].GetComponent<TileScript>().Node;
+            GameObject Planet = GameObject.FindGameObjectWithTag("Planet");
+            Vector2 PlanetIndices = Planet.GetComponent<NavigationObject>().GetGridIndex();
+            PathNode goal = grid[(int)PlanetIndices.y,(int)PlanetIndices.x].GetComponent<TileScript>().Node;
+            PathManager.Instance.GetShortestPath(start,goal);
+        }   
     }
 
     private void BuildGrid()
@@ -108,6 +118,8 @@ public class GridManager : MonoBehaviour
                 panelTransform.localScale = Vector3.one;
                 panelTransform.anchoredPosition = new Vector3(64f * col, -64f * row);
                 tileScript.tilePanel = panelInst.GetComponent<TilePanelScript>();
+                // Create a new Pathnode for new tile
+                tileScript.Node = new PathNode(tileInst);
             }
             count--;
         }
@@ -129,21 +141,39 @@ public class GridManager : MonoBehaviour
             for (int col = 0; col < columns; col++)
             {
                 TileScript tileScript = grid[row, col].GetComponent<TileScript>();
+                tileScript.ResetNeighbourConnections();
+                if(tileScript.status == TileStatus.IMPASSABLE) continue;
                 if (row > 0) // Set top neighbour if tile is not in top row.
                 {
-                    tileScript.SetNeighbourTile((int)NeighbourTile.TOP_TILE, grid[row - 1, col]);
+                    if (grid[row - 1, col].GetComponent<TileScript>().status != TileStatus.IMPASSABLE)
+                    {
+                        tileScript.SetNeighbourTile((int)NeighbourTile.TOP_TILE, grid[row - 1, col]);
+                        tileScript.Node.AddConection(new PathConnection(tileScript.Node, grid[row - 1, col].GetComponent<TileScript>().Node, Vector3.Distance(tileScript.transform.position , grid[row - 1, col].GetComponent<TileScript>().transform.position)));
+                    } 
                 }
                 if (col < columns - 1) // Set right neighbour if tile is not in rightmost row.
                 {
-                    tileScript.SetNeighbourTile((int)NeighbourTile.RIGHT_TILE, grid[row, col + 1]);
+                    if (grid[row, col + 1].GetComponent<TileScript>().status != TileStatus.IMPASSABLE)
+                    { 
+                        tileScript.SetNeighbourTile((int)NeighbourTile.RIGHT_TILE, grid[row, col + 1]);
+                        tileScript.Node.AddConection(new PathConnection(tileScript.Node, grid[row, col + 1].GetComponent<TileScript>().Node, Vector3.Distance(tileScript.transform.position , grid[row, col + 1].GetComponent<TileScript>().transform.position)));
+                    } 
                 }
                 if (row < rows - 1) // Set bottom neighbour if tile is not in bottom row.
                 {
-                    tileScript.SetNeighbourTile((int)NeighbourTile.BOTTOM_TILE, grid[row + 1, col]);
+                    if (grid[row + 1, col].GetComponent<TileScript>().status != TileStatus.IMPASSABLE)
+                    { 
+                        tileScript.SetNeighbourTile((int)NeighbourTile.BOTTOM_TILE, grid[row + 1, col]);
+                        tileScript.Node.AddConection(new PathConnection(tileScript.Node, grid[row + 1, col].GetComponent<TileScript>().Node, Vector3.Distance(tileScript.transform.position , grid[row + 1, col].GetComponent<TileScript>().transform.position)));
+                    } 
                 }
                 if (col > 0) // Set left neighbour if tile is not in leftmost row.
                 {
-                    tileScript.SetNeighbourTile((int)NeighbourTile.LEFT_TILE, grid[row, col - 1]);
+                    if (grid[row, col - 1].GetComponent<TileScript>().status != TileStatus.IMPASSABLE)
+                    { 
+                        tileScript.SetNeighbourTile((int)NeighbourTile.LEFT_TILE, grid[row, col - 1]);
+                        tileScript.Node.AddConection(new PathConnection(tileScript.Node, grid[row, col - 1].GetComponent<TileScript>().Node, Vector3.Distance(tileScript.transform.position , grid[row, col - 1].GetComponent<TileScript>().transform.position)));
+                    } 
                 }
             }
         }

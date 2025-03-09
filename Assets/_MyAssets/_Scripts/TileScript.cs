@@ -11,6 +11,13 @@ public class TileScript : MonoBehaviour
     public TileStatus status = TileStatus.UNVISITED;
     public float cost = 999.9f;
     
+    public PathNode Node{get; set;}
+
+    public void ResetNeighbourConnections()
+    {
+        neighbourTiles = new GameObject[4];
+        Node.connections.Clear();
+    }
     public void SetNeighbourTile(int index, GameObject tile)
     {
         neighbourTiles[index] = tile;
