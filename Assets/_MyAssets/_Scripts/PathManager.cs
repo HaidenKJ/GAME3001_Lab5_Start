@@ -46,6 +46,7 @@ public class NodeRecord
         costSoFar = 0f;
     }
 }
+[System.Serializable]
 public class PathManager : MonoBehaviour
 {
     public List<NodeRecord> openList;

@@ -94,6 +94,14 @@ public class GridManager : MonoBehaviour
             GameObject Planet = GameObject.FindGameObjectWithTag("Planet");
             Vector2 PlanetIndices = Planet.GetComponent<NavigationObject>().GetGridIndex();
             PathNode goal = grid[(int)PlanetIndices.y,(int)PlanetIndices.x].GetComponent<TileScript>().Node;
+            if(ship != null && Planet != null && PathManager.Instance != null)
+                { 
+                    Debug.Log("Planet & Ship set correctly");
+                }
+                else 
+                {
+                    Debug.LogError("Ship or Planet is not set correctly");
+                }
             PathManager.Instance.GetShortestPath(start,goal);
         }   
         if (Input.GetKeyDown(KeyCode.R)) // reset grid/pathfinidng
