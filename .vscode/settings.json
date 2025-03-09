@@ -56,5 +56,5 @@
         "temp/": true,
         "Temp/": true
     },
-    "dotnet.defaultSolution": "GAME3001_Lab5_Start.sln"
+    "dotnet.defaultSolution": "GAME3001_Assaignment2_Complete.sln"
 }
