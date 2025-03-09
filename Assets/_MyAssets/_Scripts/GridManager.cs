@@ -148,7 +148,7 @@ public class GridManager : MonoBehaviour
         SetTileCosts(planetIndices);
     }
 
-    private void ConnectGrid()
+    public void ConnectGrid()
     {
         for (int row = 0; row < rows; row++)
         {
