@@ -9,7 +9,8 @@ public enum TileStatus
     CLOSED,
     IMPASSABLE,
     GOAL,
-    START
+    START,
+    PATH, // Lab 5
 };
 
 public enum NeighbourTile

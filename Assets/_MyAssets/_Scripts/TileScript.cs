@@ -52,6 +52,10 @@ public class TileScript : MonoBehaviour
                 gameObject.GetComponent<SpriteRenderer>().color = new Color(0f, 0.5f, 0f, 0.5f);
                 tilePanel.statusText.text = "S";
                 break;
+            case TileStatus.PATH:
+                gameObject.GetComponent<SpriteRenderer>().color = new Color(1f, 1f, 1f, 0.5f);
+                tilePanel.statusText.text = "P";
+                break;
         }
     }
 }
