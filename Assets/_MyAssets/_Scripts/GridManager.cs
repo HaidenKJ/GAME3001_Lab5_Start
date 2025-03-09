@@ -63,7 +63,7 @@ public class GridManager : MonoBehaviour
         if (Input.GetKeyDown(KeyCode.G))
         {
             foreach(Transform child in transform)
-                child.gameObject.SetActive(!child.gameObject.activeSelf);
+            child.gameObject.SetActive(!child.gameObject.activeSelf);
             panelParent.gameObject.SetActive(!panelParent.gameObject.activeSelf);
         }
         if (Input.GetKeyDown(KeyCode.M))
@@ -73,6 +73,7 @@ public class GridManager : MonoBehaviour
             Vector2 mineIndex = mineInst.GetComponent<NavigationObject>().GetGridIndex();
             grid[(int)mineIndex.y, (int)mineIndex.x].GetComponent<TileScript>().SetStatus(TileStatus.IMPASSABLE);
             mines.Add(mineInst);
+            ConnectGrid();
         }
         if (Input.GetKeyDown(KeyCode.C))
         {
@@ -83,6 +84,7 @@ public class GridManager : MonoBehaviour
                 Destroy(mine);
             }
             mines.Clear();
+            ConnectGrid();
         }
         if (Input.GetKeyDown(KeyCode.F))
         {
@@ -94,6 +96,10 @@ public class GridManager : MonoBehaviour
             PathNode goal = grid[(int)PlanetIndices.y,(int)PlanetIndices.x].GetComponent<TileScript>().Node;
             PathManager.Instance.GetShortestPath(start,goal);
         }   
+        if (Input.GetKeyDown(KeyCode.R)) // reset grid/pathfinidng
+        {
+            SetTileStatuses();
+        }
     }
 
     private void BuildGrid()
@@ -218,5 +224,27 @@ public class GridManager : MonoBehaviour
                 tileScript.tilePanel.costText.text = tileScript.cost.ToString("F1");
             }
         }
+    }
+    public void SetTileStatuses()
+    {
+        foreach(GameObject go in grid)
+        {
+            go.GetComponent<TileScript>().SetStatus(TileStatus.UNVISITED);   
+        }
+        foreach(GameObject mine in mines)
+        {
+            Vector2 mineIndex = mine.GetComponent<NavigationObject>().GetGridIndex();
+            grid[(int)mineIndex.y,(int)mineIndex.x].GetComponent<TileScript>().SetStatus(TileStatus.IMPASSABLE);
+        }
+        // Set the tile under the ship as start
+        GameObject ship = GameObject.FindGameObjectWithTag("Ship");
+        Vector2 shipIndices = ship.GetComponent<NavigationObject>().GetGridIndex();
+        grid[(int)shipIndices.y, (int)shipIndices.x].GetComponent<TileScript>().SetStatus(TileStatus.START);
+        // Set the tile under the player to Goal and set tile costs.
+        GameObject planet = GameObject.FindGameObjectWithTag("Planet");
+        Vector2 planetIndices = planet.GetComponent<NavigationObject>().GetGridIndex();
+        grid[(int)planetIndices.y, (int)planetIndices.x].GetComponent<TileScript>().SetStatus(TileStatus.GOAL);
+        SetTileCosts(planetIndices);
+        
     }
 }
