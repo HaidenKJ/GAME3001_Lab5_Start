@@ -4,14 +4,23 @@ using UnityEngine;
 
 public class ShipMovement : MonoBehaviour
 {
-
     public float moveSpeed = 1f;
+    public AudioClip collisionSound;
+    public AudioClip MoveNoise;
+    [SerializeField] public AudioSource audioSource; // AudioSource to play sound
 
     // Start is called before the first frame update
     void Start()
     {
-        
-    }
+        // Get the AudioSource component attached to the GameObject
+        audioSource = GetComponent<AudioSource>();
+
+        if (audioSource == null)
+        {
+            Debug.LogError("AudioSource is missing!");
+        }
+}
+    
 
     void Update()
     {
@@ -22,6 +31,13 @@ public class ShipMovement : MonoBehaviour
             transform.position += Vector3.up * moveSpeed;
             // Rotate to face up (90 degrees)
             transform.rotation = Quaternion.Euler(0, 0, 90);
+
+            if (audioSource != null && MoveNoise != null)
+            {
+                Debug.Log("Playing move sound");
+                audioSource.PlayOneShot(MoveNoise);
+            }
+
         }
         else if (Input.GetKeyDown(KeyCode.S))
         {
@@ -29,6 +45,11 @@ public class ShipMovement : MonoBehaviour
             transform.position += Vector3.down * moveSpeed;
             // Rotate to face down (-90 degrees)
             transform.rotation = Quaternion.Euler(0, 0, -90);
+
+            if (audioSource != null && MoveNoise != null)
+            {
+                audioSource.PlayOneShot(MoveNoise);
+            }
         }
         else if (Input.GetKeyDown(KeyCode.A))
         {
@@ -36,6 +57,11 @@ public class ShipMovement : MonoBehaviour
             transform.position += Vector3.left * moveSpeed;
             // Rotate to face left (180 degrees)
             transform.rotation = Quaternion.Euler(0, 0, 180);
+
+            if (audioSource != null && MoveNoise != null)
+            {
+                audioSource.PlayOneShot(MoveNoise);
+            }
         }
         else if (Input.GetKeyDown(KeyCode.D))
         {
@@ -43,8 +69,23 @@ public class ShipMovement : MonoBehaviour
             transform.position += Vector3.right * moveSpeed;
             // Rotate to face right (no rotation needed)
             transform.rotation = Quaternion.Euler(0, 0, 0);
+
+            if (audioSource != null && MoveNoise != null)
+            {
+                audioSource.PlayOneShot(MoveNoise);
+            }
+        }
+    }
+
+    // This function is triggered when the collider of the ship enters another collider
+    void OnCollisionEnter(Collision collision)
+    {
+        Debug.Log("Collision Detected with: " + collision.gameObject.name);
+        if (audioSource != null && collisionSound != null)
+        {
+            Debug.Log("Playing Collision Sound");
+            audioSource.PlayOneShot(collisionSound);
         }
     }
 }
-
 

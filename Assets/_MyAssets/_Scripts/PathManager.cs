@@ -51,11 +51,14 @@ public class PathManager : MonoBehaviour
     public List<NodeRecord> closeList;
     // the path we provide
     public List<PathConnection> path;
-    public static PathManager Instance {get; private set;}
+    public static PathManager Instance { get; private set; }
+    private PathNode startNode;  // Declare a variable for the start node
+    private bool startTileUpdated = false;  // Flag to track if the start tile has been updated
+
     // ------------Singleton----------------------
     void Awake()
     {
-        if(Instance == null) // If gameObject/Instance doesnt exist
+        if (Instance == null) // If gameObject/Instance doesnt exist
         {
             Instance = this;
             Initialize();
@@ -66,6 +69,17 @@ public class PathManager : MonoBehaviour
         }
     }
     // ------------Singleton----------------------
+
+    void Update()
+    {
+        // If startTileUpdated is false, update the start tile status.
+        if (startNode != null && !startTileUpdated)
+        {
+            startNode.tile.GetComponent<TileScript>().SetStatus(TileStatus.START);
+            startTileUpdated = true;
+        }
+    }
+
     private void Initialize()
     {
         openList = new List<NodeRecord>();
@@ -75,34 +89,41 @@ public class PathManager : MonoBehaviour
 
     public void GetShortestPath(PathNode start, PathNode goal)
     {
-        if(path.Count >0)
+        // Set the start node in PathManager
+        startNode = start; 
+
+        if (path.Count > 0)
         {
             path.Clear();
         }
+
         NodeRecord currentRecord = null;
         openList.Add(new NodeRecord(start));
-        while(openList.Count >0)
+
+        while (openList.Count > 0)
         {
             currentRecord = GetSmallestNode();
-            if(currentRecord.node == goal)
+
+            if (currentRecord.node == goal)
             {
                 openList.Remove(currentRecord);
                 closeList.Add(currentRecord);
                 currentRecord.node.tile.GetComponent<TileScript>().SetStatus(TileStatus.CLOSED);
                 break;
             }
+
             List<PathConnection> connections = currentRecord.node.connections;
-            for(int i = 0; i<connections.Count; i++)
+            for (int i = 0; i < connections.Count; i++)
             {
                 PathNode endNode = connections[i].toNode;
                 NodeRecord endNodeRecord;
                 float endNodeCost = currentRecord.costSoFar + connections[i].cost;
-                if(ContainsNode(closeList, endNode)) continue;
-                else if(ContainsNode(openList, endNode))
+                if (ContainsNode(closeList, endNode)) continue;
+                else if (ContainsNode(openList, endNode))
                 {
                     endNodeRecord = GetNodeRecord(openList, endNode);
-                    if(endNodeRecord.costSoFar <= endNodeCost)
-                    continue; 
+                    if (endNodeRecord.costSoFar <= endNodeCost)
+                        continue; 
                 }
                 else
                 {
@@ -112,25 +133,29 @@ public class PathManager : MonoBehaviour
                 endNodeRecord.costSoFar = endNodeCost;
                 endNodeRecord.pathConnection = connections[i];
                 endNodeRecord.fromRecord = currentRecord;
-                if(!ContainsNode(openList,endNode))
+
+                if (!ContainsNode(openList, endNode))
                 {
                     openList.Add(endNodeRecord);
                     endNodeRecord.node.tile.GetComponent<TileScript>().SetStatus(TileStatus.CLOSED);
                 }
             }
+
             openList.Remove(currentRecord);
             closeList.Add(currentRecord);
             currentRecord.node.tile.GetComponent<TileScript>().SetStatus(TileStatus.CLOSED);
         }
-        if(currentRecord == null) return;
-        if(currentRecord.node != goal)
+
+        if (currentRecord == null) return;
+
+        if (currentRecord.node != goal)
         {
             Debug.LogError("Could not find path to goal!!");
         }
         else
         {
             Debug.Log("Path Found");
-            while(currentRecord.node != start)
+            while (currentRecord.node != start)
             {
                 path.Add(currentRecord.pathConnection);
                 currentRecord.node.tile.GetComponent<TileScript>().SetStatus(TileStatus.PATH);
@@ -138,41 +163,50 @@ public class PathManager : MonoBehaviour
             }
             path.Reverse();
         }
+
         openList.Clear();
         closeList.Clear();
-
+        
+        // Set start tile status to 'START' (or any other desired status)
+        if (!startTileUpdated)
+        {
+            start.tile.GetComponent<TileScript>().SetStatus(TileStatus.START);
+            startTileUpdated = true; // Make sure we update it only once
+        }
     }
 
     public NodeRecord GetSmallestNode()
     {
         NodeRecord smallestNode = openList[0];
-        for(int i = 1; i <openList.Count; i++)
+        for (int i = 1; i < openList.Count; i++)
         {
-            if(openList[i].costSoFar < smallestNode.costSoFar)
+            if (openList[i].costSoFar < smallestNode.costSoFar)
             {
                 smallestNode = openList[i];
             }
-            else if(openList[i].costSoFar == smallestNode.costSoFar)
+            else if (openList[i].costSoFar == smallestNode.costSoFar)
             {
-                smallestNode = (Random.value< 0.5f ? openList[i] : smallestNode);
+                smallestNode = (Random.value < 0.5f ? openList[i] : smallestNode);
             }
         }
         return smallestNode;
     }
+
     public bool ContainsNode(List<NodeRecord> list, PathNode node)
     {
-        foreach(NodeRecord record in list)
+        foreach (NodeRecord record in list)
         {
-            if(record.node == node) return true;
-        }   
+            if (record.node == node) return true;
+        }
         return false;
     }
+
     public NodeRecord GetNodeRecord(List<NodeRecord> list, PathNode node)
     {
-        foreach(NodeRecord record in list)
+        foreach (NodeRecord record in list)
         {
-            if(record.node == node) return record;
-        }   
+            if (record.node == node) return record;
+        }
         return null;
     }
 }
